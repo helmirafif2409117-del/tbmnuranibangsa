@@ -35,6 +35,13 @@ export const Route = createRootRoute({
       { title: "TBM Nurani Bangsa — Taman Baca Anak Malang" },
       { name: "description", content: "Taman Baca Masyarakat Nurani Bangsa di Bunulrejo, Malang. Tempat membaca, belajar, dan berkreasi untuk anak-anak." },
       { property: "og:type", content: "website" },
+      { property: "og:title", content: "TBM Nurani Bangsa — Taman Baca Anak Malang" },
+      { name: "twitter:title", content: "TBM Nurani Bangsa — Taman Baca Anak Malang" },
+      { property: "og:description", content: "Taman Baca Masyarakat Nurani Bangsa di Bunulrejo, Malang. Tempat membaca, belajar, dan berkreasi untuk anak-anak." },
+      { name: "twitter:description", content: "Taman Baca Masyarakat Nurani Bangsa di Bunulrejo, Malang. Tempat membaca, belajar, dan berkreasi untuk anak-anak." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1ffd1e48-6e94-45e8-838c-f28efa426149/id-preview-1266adf1--340ab498-59dc-492b-afd3-9bf755652fd8.lovable.app-1777583947771.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1ffd1e48-6e94-45e8-838c-f28efa426149/id-preview-1266adf1--340ab498-59dc-492b-afd3-9bf755652fd8.lovable.app-1777583947771.png" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

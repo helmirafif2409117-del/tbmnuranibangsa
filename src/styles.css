@@ -52,16 +52,16 @@
   --shadow-soft: 0 10px 30px -12px color-mix(in oklab, var(--ink) 18%, transparent);
   --shadow-pop: 0 14px 0 0 color-mix(in oklab, var(--ink) 100%, transparent);
 
-  --gradient-warm: linear-gradient(135deg, var(--sun), var(--terracotta));
+  --gradient-warm: linear-gradient(135deg, var(--gold), var(--orange));
   --gradient-sky: linear-gradient(135deg, var(--leaf), var(--primary));
   --gradient-page: radial-gradient(
       1200px 600px at 80% -10%,
-      color-mix(in oklab, var(--sun) 28%, transparent),
+      color-mix(in oklab, var(--gold) 22%, transparent),
       transparent 60%
     ),
     radial-gradient(
       900px 500px at -10% 30%,
-      color-mix(in oklab, var(--leaf) 20%, transparent),
+      color-mix(in oklab, var(--navy) 12%, transparent),
       transparent 60%
     );
 
@@ -76,42 +76,46 @@
   --radius: 1rem;
 
   /* Base */
-  --background: oklch(0.985 0.018 90);
-  --foreground: oklch(0.24 0.04 50);
-  --ink: oklch(0.22 0.04 50);
+  --background: oklch(0.97 0.018 85);
+  --foreground: oklch(0.22 0.05 255);
+  --ink: oklch(0.2 0.05 255);
 
-  /* Brand */
-  --cream: oklch(0.97 0.03 88);
-  --sun: oklch(0.83 0.16 78);            /* mustard yellow */
-  --terracotta: oklch(0.68 0.16 38);     /* warm orange-red */
-  --leaf: oklch(0.62 0.11 195);          /* friendly teal */
+  /* Brand — diturunkan dari logo TBM Nurani Bangsa */
+  --cream: oklch(0.96 0.025 85);
+  --navy: oklch(0.32 0.09 255);          /* biru tua logo */
+  --navy-deep: oklch(0.24 0.08 255);
+  --gold: oklch(0.82 0.15 80);           /* emas/kuning logo */
+  --sun: oklch(0.82 0.15 80);
+  --orange: oklch(0.7 0.17 45);          /* oranye bintang */
+  --terracotta: oklch(0.7 0.17 45);
+  --leaf: oklch(0.62 0.11 195);
 
-  --primary: oklch(0.68 0.16 38);            /* terracotta */
-  --primary-foreground: oklch(0.985 0.02 90);
-  --secondary: oklch(0.62 0.11 195);         /* teal */
-  --secondary-foreground: oklch(0.985 0.02 90);
-  --accent: oklch(0.83 0.16 78);             /* mustard */
-  --accent-foreground: oklch(0.22 0.04 50);
+  --primary: oklch(0.32 0.09 255);            /* navy */
+  --primary-foreground: oklch(0.97 0.02 85);
+  --secondary: oklch(0.7 0.17 45);            /* oranye */
+  --secondary-foreground: oklch(0.99 0.01 85);
+  --accent: oklch(0.82 0.15 80);              /* emas */
+  --accent-foreground: oklch(0.22 0.05 255);
 
-  --card: oklch(0.99 0.01 90);
-  --card-foreground: oklch(0.22 0.04 50);
-  --popover: oklch(0.99 0.01 90);
-  --popover-foreground: oklch(0.22 0.04 50);
+  --card: oklch(0.99 0.01 85);
+  --card-foreground: oklch(0.22 0.05 255);
+  --popover: oklch(0.99 0.01 85);
+  --popover-foreground: oklch(0.22 0.05 255);
 
   --muted: oklch(0.94 0.02 85);
-  --muted-foreground: oklch(0.45 0.03 60);
+  --muted-foreground: oklch(0.45 0.04 255);
 
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.985 0.02 90);
 
-  --border: oklch(0.88 0.03 80);
+  --border: oklch(0.88 0.025 80);
   --input: oklch(0.9 0.02 80);
-  --ring: oklch(0.68 0.16 38);
+  --ring: oklch(0.32 0.09 255);
 
-  --chart-1: oklch(0.83 0.16 78);
-  --chart-2: oklch(0.68 0.16 38);
-  --chart-3: oklch(0.62 0.11 195);
-  --chart-4: oklch(0.7 0.14 150);
+  --chart-1: oklch(0.32 0.09 255);
+  --chart-2: oklch(0.82 0.15 80);
+  --chart-3: oklch(0.7 0.17 45);
+  --chart-4: oklch(0.62 0.11 195);
   --chart-5: oklch(0.55 0.18 20);
 }
 

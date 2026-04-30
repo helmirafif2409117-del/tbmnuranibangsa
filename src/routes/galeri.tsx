@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Section } from "@/components/site/Section";
-import hero from "@/assets/hero-reading.jpg";
+import k1 from "@/assets/kegiatan-1.jpg";
+import k2 from "@/assets/kegiatan-2.jpg";
+import k3 from "@/assets/kegiatan-3.jpg";
 import library from "@/assets/library-corner.jpg";
 import storytelling from "@/assets/storytelling.jpg";
+import hero from "@/assets/hero-reading.jpg";
 
 export const Route = createFileRoute("/galeri")({
   head: () => ({
@@ -17,11 +20,11 @@ export const Route = createFileRoute("/galeri")({
 });
 
 const items = [
-  { src: hero, alt: "Anak-anak membaca bersama", caption: "Membaca bersama di taman", tall: true },
+  { src: k1, alt: "Kunjungan dan apresiasi", caption: "Kunjungan & apresiasi", tall: true },
+  { src: k2, alt: "Anak-anak belajar bersama", caption: "Belajar bersama di teras", tall: false },
+  { src: k3, alt: "Membaca buku di teras", caption: "Memilih buku favorit", tall: false },
   { src: library, alt: "Sudut baca yang nyaman", caption: "Sudut baca favorit", tall: false },
-  { src: storytelling, alt: "Mendongeng sore", caption: "Mendongeng sore", tall: false },
-  { src: library, alt: "Rak buku berwarna", caption: "Koleksi yang terus bertambah", tall: false },
-  { src: storytelling, alt: "Aktivitas kreatif", caption: "Kelas kreatif", tall: true },
+  { src: storytelling, alt: "Mendongeng sore", caption: "Mendongeng sore", tall: true },
   { src: hero, alt: "Tawa anak-anak", caption: "Tawa yang menyatukan", tall: false },
 ];
 

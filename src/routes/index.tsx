@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Section } from "@/components/site/Section";
+import { PhotoSlider } from "@/components/site/PhotoSlider";
 import { BookOpen, Sparkles, Heart, Users, ArrowRight, Star } from "lucide-react";
-import hero from "@/assets/hero-reading.jpg";
 import mascot from "@/assets/book-mascot.png";
 import library from "@/assets/library-corner.jpg";
 
@@ -77,20 +77,13 @@ function HomePage() {
           </div>
 
           <div className="relative animate-[pop-in_0.7s_cubic-bezier(0.34,1.56,0.64,1)_both]">
-            <div className="absolute inset-0 -z-10 blob bg-gradient-to-br from-accent to-primary/40 scale-105" aria-hidden />
-            <img
-              src={hero}
-              alt="Anak-anak ceria membaca buku bersama di bawah pohon"
-              width={1536}
-              height={1152}
-              className="relative rounded-[2rem] shadow-soft border-4 border-card"
-            />
+            <PhotoSlider />
             <img
               src={mascot}
               alt=""
               width={140}
               height={140}
-              className="absolute -bottom-8 -left-6 w-28 md:w-36 animate-[wiggle_3s_ease-in-out_infinite]"
+              className="absolute -bottom-8 -left-6 w-24 md:w-32 animate-[wiggle_3s_ease-in-out_infinite] drop-shadow-xl pointer-events-none"
               aria-hidden
             />
           </div>

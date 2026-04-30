@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, BookOpen } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const links = [
   { to: "/", label: "Beranda" },
@@ -16,11 +17,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border/60">
       <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <span className="grid place-items-center h-10 w-10 rounded-2xl bg-primary text-primary-foreground shadow-soft group-hover:rotate-[-6deg] transition-transform">
-            <BookOpen className="h-5 w-5" />
-          </span>
-          <span className="font-display font-bold text-lg leading-tight">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src={logo}
+            alt="Logo TBM Nurani Bangsa"
+            width={44}
+            height={44}
+            className="h-11 w-11 rounded-full ring-2 ring-accent/40 shadow-soft group-hover:rotate-[-6deg] transition-transform"
+          />
+          <span className="font-display font-bold text-base sm:text-lg leading-tight">
             TBM <span className="text-gradient-warm">Nurani Bangsa</span>
           </span>
         </Link>

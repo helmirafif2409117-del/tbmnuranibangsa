@@ -1,15 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Instagram, Facebook, Mail, MapPin } from "lucide-react";
+import { Instagram, Facebook, Mail, MapPin } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-border/60 bg-card/60">
       <div className="mx-auto max-w-6xl px-4 py-12 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2">
-            <span className="grid place-items-center h-10 w-10 rounded-2xl bg-primary text-primary-foreground shadow-soft">
-              <BookOpen className="h-5 w-5" />
-            </span>
+          <div className="flex items-center gap-2.5">
+            <img src={logo} alt="Logo TBM Nurani Bangsa" width={44} height={44} className="h-11 w-11 rounded-full ring-2 ring-accent/40" />
             <span className="font-display font-bold text-lg">
               TBM <span className="text-gradient-warm">Nurani Bangsa</span>
             </span>

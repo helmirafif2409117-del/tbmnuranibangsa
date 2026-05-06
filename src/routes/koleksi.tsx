@@ -175,9 +175,10 @@ function KoleksiPage() {
 
       <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {filtered.map((b, i) => (
-          <button
+          <Link
             key={b.id}
-            onClick={() => setActive(b)}
+            to="/koleksi/$bookId"
+            params={{ bookId: b.id }}
             className="text-left group rounded-3xl bg-card border border-border/60 overflow-hidden hover:-translate-y-1 hover:shadow-soft transition-all flex flex-col"
             style={{ animation: `fade-in-up 0.5s ease-out ${i * 0.04}s both` }}
           >
@@ -215,7 +216,7 @@ function KoleksiPage() {
                 <div className="mt-auto pt-3 text-[11px] font-mono text-muted-foreground">📕 {b.identifier}</div>
               )}
             </div>
-          </button>
+          </Link>
         ))}
         {!loading && filtered.length === 0 && (
           <div className="col-span-full text-center py-16 text-muted-foreground">

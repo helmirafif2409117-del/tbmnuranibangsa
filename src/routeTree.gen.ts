@@ -16,6 +16,7 @@ import { Route as KoleksiRouteImport } from './routes/koleksi'
 import { Route as GaleriRouteImport } from './routes/galeri'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KoleksiBookIdRouteImport } from './routes/koleksi.$bookId'
 
 const TentangRoute = TentangRouteImport.update({
   id: '/tentang',
@@ -52,34 +53,42 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KoleksiBookIdRoute = KoleksiBookIdRouteImport.update({
+  id: '/$bookId',
+  path: '/$bookId',
+  getParentRoute: () => KoleksiRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/galeri': typeof GaleriRoute
-  '/koleksi': typeof KoleksiRoute
+  '/koleksi': typeof KoleksiRouteWithChildren
   '/kontak': typeof KontakRoute
   '/program': typeof ProgramRoute
   '/tentang': typeof TentangRoute
+  '/koleksi/$bookId': typeof KoleksiBookIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/galeri': typeof GaleriRoute
-  '/koleksi': typeof KoleksiRoute
+  '/koleksi': typeof KoleksiRouteWithChildren
   '/kontak': typeof KontakRoute
   '/program': typeof ProgramRoute
   '/tentang': typeof TentangRoute
+  '/koleksi/$bookId': typeof KoleksiBookIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/galeri': typeof GaleriRoute
-  '/koleksi': typeof KoleksiRoute
+  '/koleksi': typeof KoleksiRouteWithChildren
   '/kontak': typeof KontakRoute
   '/program': typeof ProgramRoute
   '/tentang': typeof TentangRoute
+  '/koleksi/$bookId': typeof KoleksiBookIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/program'
     | '/tentang'
+    | '/koleksi/$bookId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/program'
     | '/tentang'
+    | '/koleksi/$bookId'
   id:
     | '__root__'
     | '/'
@@ -109,13 +120,14 @@ export interface FileRouteTypes {
     | '/kontak'
     | '/program'
     | '/tentang'
+    | '/koleksi/$bookId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   GaleriRoute: typeof GaleriRoute
-  KoleksiRoute: typeof KoleksiRoute
+  KoleksiRoute: typeof KoleksiRouteWithChildren
   KontakRoute: typeof KontakRoute
   ProgramRoute: typeof ProgramRoute
   TentangRoute: typeof TentangRoute
@@ -172,14 +184,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/koleksi/$bookId': {
+      id: '/koleksi/$bookId'
+      path: '/$bookId'
+      fullPath: '/koleksi/$bookId'
+      preLoaderRoute: typeof KoleksiBookIdRouteImport
+      parentRoute: typeof KoleksiRoute
+    }
   }
 }
+
+interface KoleksiRouteChildren {
+  KoleksiBookIdRoute: typeof KoleksiBookIdRoute
+}
+
+const KoleksiRouteChildren: KoleksiRouteChildren = {
+  KoleksiBookIdRoute: KoleksiBookIdRoute,
+}
+
+const KoleksiRouteWithChildren =
+  KoleksiRoute._addFileChildren(KoleksiRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   GaleriRoute: GaleriRoute,
-  KoleksiRoute: KoleksiRoute,
+  KoleksiRoute: KoleksiRouteWithChildren,
   KontakRoute: KontakRoute,
   ProgramRoute: ProgramRoute,
   TentangRoute: TentangRoute,

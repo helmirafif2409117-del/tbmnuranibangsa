@@ -7,6 +7,7 @@ const links = [
   { to: "/", label: "Beranda" },
   { to: "/tentang", label: "Tentang" },
   { to: "/program", label: "Program" },
+  { to: "/koleksi", label: "Koleksi" },
   { to: "/galeri", label: "Galeri" },
   { to: "/kontak", label: "Kontak" },
 ] as const;

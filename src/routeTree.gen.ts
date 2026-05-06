@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TentangRouteImport } from './routes/tentang'
 import { Route as ProgramRouteImport } from './routes/program'
 import { Route as KontakRouteImport } from './routes/kontak'
+import { Route as KoleksiRouteImport } from './routes/koleksi'
 import { Route as GaleriRouteImport } from './routes/galeri'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TentangRoute = TentangRouteImport.update({
@@ -30,9 +32,19 @@ const KontakRoute = KontakRouteImport.update({
   path: '/kontak',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KoleksiRoute = KoleksiRouteImport.update({
+  id: '/koleksi',
+  path: '/koleksi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GaleriRoute = GaleriRouteImport.update({
   id: '/galeri',
   path: '/galeri',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +55,18 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/galeri': typeof GaleriRoute
+  '/koleksi': typeof KoleksiRoute
   '/kontak': typeof KontakRoute
   '/program': typeof ProgramRoute
   '/tentang': typeof TentangRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/galeri': typeof GaleriRoute
+  '/koleksi': typeof KoleksiRoute
   '/kontak': typeof KontakRoute
   '/program': typeof ProgramRoute
   '/tentang': typeof TentangRoute
@@ -58,22 +74,48 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/galeri': typeof GaleriRoute
+  '/koleksi': typeof KoleksiRoute
   '/kontak': typeof KontakRoute
   '/program': typeof ProgramRoute
   '/tentang': typeof TentangRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/galeri' | '/kontak' | '/program' | '/tentang'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/galeri'
+    | '/koleksi'
+    | '/kontak'
+    | '/program'
+    | '/tentang'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/galeri' | '/kontak' | '/program' | '/tentang'
-  id: '__root__' | '/' | '/galeri' | '/kontak' | '/program' | '/tentang'
+  to:
+    | '/'
+    | '/admin'
+    | '/galeri'
+    | '/koleksi'
+    | '/kontak'
+    | '/program'
+    | '/tentang'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/galeri'
+    | '/koleksi'
+    | '/kontak'
+    | '/program'
+    | '/tentang'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   GaleriRoute: typeof GaleriRoute
+  KoleksiRoute: typeof KoleksiRoute
   KontakRoute: typeof KontakRoute
   ProgramRoute: typeof ProgramRoute
   TentangRoute: typeof TentangRoute
@@ -102,11 +144,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KontakRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/koleksi': {
+      id: '/koleksi'
+      path: '/koleksi'
+      fullPath: '/koleksi'
+      preLoaderRoute: typeof KoleksiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/galeri': {
       id: '/galeri'
       path: '/galeri'
       fullPath: '/galeri'
       preLoaderRoute: typeof GaleriRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -121,7 +177,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   GaleriRoute: GaleriRoute,
+  KoleksiRoute: KoleksiRoute,
   KontakRoute: KontakRoute,
   ProgramRoute: ProgramRoute,
   TentangRoute: TentangRoute,
@@ -129,12 +187,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

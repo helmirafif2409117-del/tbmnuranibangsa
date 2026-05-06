@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Section } from "@/components/site/Section";
 import { MapPin, Clock, Phone, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
+
+const LeafletMap = lazy(() =>
+  import("@/components/site/LeafletMap").then((m) => ({ default: m.LeafletMap })),
+);
 
 export const Route = createFileRoute("/kontak")({
   head: () => ({
@@ -17,7 +21,6 @@ export const Route = createFileRoute("/kontak")({
 });
 
 const ADDRESS = "Jl. Hamid Rusdi No.91, Bunulrejo, Kec. Blimbing, Kota Malang, Jawa Timur";
-const MAP_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`;
 
 function ContactPage() {
   const [sending, setSending] = useState(false);
@@ -57,14 +60,10 @@ function ContactPage() {
             </div>
           ))}
 
-          <div className="rounded-3xl overflow-hidden border-4 border-card shadow-soft h-72">
-            <iframe
-              title="Lokasi TBM Nurani Bangsa"
-              src={MAP_SRC}
-              className="w-full h-full"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+          <div className="rounded-3xl overflow-hidden border-4 border-card shadow-soft h-80 bg-muted">
+            <Suspense fallback={<div className="w-full h-full grid place-items-center text-sm text-muted-foreground">Memuat peta…</div>}>
+              <LeafletMap />
+            </Suspense>
           </div>
         </div>
 

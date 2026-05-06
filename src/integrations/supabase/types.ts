@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      books: {
+        Row: {
+          contributor: string | null
+          cover_url: string | null
+          coverage: string | null
+          created_at: string
+          creator: string | null
+          description: string | null
+          id: string
+          identifier: string | null
+          language: string | null
+          marc_record: string | null
+          publisher: string | null
+          series: string | null
+          subject: string[] | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          contributor?: string | null
+          cover_url?: string | null
+          coverage?: string | null
+          created_at?: string
+          creator?: string | null
+          description?: string | null
+          id?: string
+          identifier?: string | null
+          language?: string | null
+          marc_record?: string | null
+          publisher?: string | null
+          series?: string | null
+          subject?: string[] | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          contributor?: string | null
+          cover_url?: string | null
+          coverage?: string | null
+          created_at?: string
+          creator?: string | null
+          description?: string | null
+          id?: string
+          identifier?: string | null
+          language?: string | null
+          marc_record?: string | null
+          publisher?: string | null
+          series?: string | null
+          subject?: string[] | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

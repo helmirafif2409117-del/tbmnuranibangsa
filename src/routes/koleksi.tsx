@@ -40,7 +40,7 @@ function KoleksiPage() {
   const [q, setQ] = useState("");
   const [field, setField] = useState<FilterField>("all");
   const [subjectFilter, setSubjectFilter] = useState<string | null>(null);
-  const [active, setActive] = useState<Book | null>(null);
+  
 
   useEffect(() => {
     supabase
@@ -175,9 +175,10 @@ function KoleksiPage() {
 
       <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {filtered.map((b, i) => (
-          <button
+          <Link
             key={b.id}
-            onClick={() => setActive(b)}
+            to="/koleksi/$bookId"
+            params={{ bookId: b.id }}
             className="text-left group rounded-3xl bg-card border border-border/60 overflow-hidden hover:-translate-y-1 hover:shadow-soft transition-all flex flex-col"
             style={{ animation: `fade-in-up 0.5s ease-out ${i * 0.04}s both` }}
           >
@@ -215,7 +216,7 @@ function KoleksiPage() {
                 <div className="mt-auto pt-3 text-[11px] font-mono text-muted-foreground">📕 {b.identifier}</div>
               )}
             </div>
-          </button>
+          </Link>
         ))}
         {!loading && filtered.length === 0 && (
           <div className="col-span-full text-center py-16 text-muted-foreground">
@@ -224,55 +225,7 @@ function KoleksiPage() {
         )}
       </div>
 
-      {active && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 backdrop-blur-sm p-4 animate-[fade-in-up_0.2s_ease-out]"
-          onClick={() => setActive(null)}
-        >
-          <div
-            className="bg-card rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 shadow-soft border border-border"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-start gap-4">
-              <h3 className="font-display text-2xl md:text-3xl font-bold leading-tight">{active.title}</h3>
-              <button onClick={() => setActive(null)} className="text-muted-foreground hover:text-foreground">✕</button>
-            </div>
-
-            <div className="mt-6 space-y-3 text-sm">
-              <Meta icon={User} label="Creator" value={active.creator} />
-              <Meta icon={User} label="Contributor" value={active.contributor} />
-              <Meta icon={Tag} label="Subject" value={active.subject?.join("; ")} />
-              <Meta label="Publisher" value={active.publisher} />
-              <Meta label="Series" value={active.series} />
-              <Meta label="Language" value={active.language} />
-              <Meta label="Type" value={active.type} />
-              <Meta label="Identifier" value={active.identifier} />
-              <Meta label="Description" value={active.description} />
-            </div>
-
-            {active.marc_record && (
-              <details className="mt-6">
-                <summary className="text-sm font-bold cursor-pointer text-primary">MARC 21 Record</summary>
-                <pre className="mt-3 p-4 bg-muted rounded-xl text-xs overflow-x-auto whitespace-pre-wrap font-mono">
-                  {active.marc_record}
-                </pre>
-              </details>
-            )}
-          </div>
-        </div>
-      )}
     </Section>
   );
 }
 
-function Meta({ icon: Icon, label, value }: { icon?: any; label: string; value?: string | null }) {
-  if (!value) return null;
-  return (
-    <div className="grid grid-cols-[120px_1fr] gap-3">
-      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-        {Icon && <Icon className="h-3.5 w-3.5" />} {label}
-      </span>
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}

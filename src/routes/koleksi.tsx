@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Section } from "@/components/site/Section";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, BookOpen, User, Tag, Library } from "lucide-react";
+import { Search, BookOpen, User, Tag, Library, X, Filter } from "lucide-react";
+
+type FilterField = "all" | "title" | "creator" | "subject";
 
 export const Route = createFileRoute("/koleksi")({
   head: () => ({

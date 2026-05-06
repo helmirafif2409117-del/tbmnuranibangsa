@@ -40,7 +40,7 @@ function KoleksiPage() {
   const [q, setQ] = useState("");
   const [field, setField] = useState<FilterField>("all");
   const [subjectFilter, setSubjectFilter] = useState<string | null>(null);
-  const [active, setActive] = useState<Book | null>(null);
+  
 
   useEffect(() => {
     supabase

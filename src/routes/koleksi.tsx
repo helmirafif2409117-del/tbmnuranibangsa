@@ -29,6 +29,7 @@ type Book = {
   identifier: string | null;
   description: string | null;
   marc_record: string | null;
+  cover_url: string | null;
 };
 
 function KoleksiPage() {
@@ -78,39 +79,52 @@ function KoleksiPage() {
         <Library className="h-4 w-4" />
         {loading ? "Memuat…" : `${filtered.length} dari ${books.length} koleksi`}
         <Link to="/admin" className="ml-auto text-primary font-semibold hover:underline">
-          + Tambah buku (Admin)
+          Admin →
         </Link>
       </div>
 
-      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {filtered.map((b, i) => (
           <button
             key={b.id}
             onClick={() => setActive(b)}
-            className="text-left group rounded-3xl bg-card border border-border/60 p-6 hover:-translate-y-1 hover:shadow-soft transition-all"
+            className="text-left group rounded-3xl bg-card border border-border/60 overflow-hidden hover:-translate-y-1 hover:shadow-soft transition-all flex flex-col"
             style={{ animation: `fade-in-up 0.5s ease-out ${i * 0.04}s both` }}
           >
-            <div className="grid place-items-center h-14 w-14 rounded-2xl bg-gradient-to-br from-accent to-secondary/60 text-primary shadow-soft group-hover:rotate-[-6deg] transition-transform">
-              <BookOpen className="h-6 w-6" />
+            <div className="aspect-[3/4] bg-gradient-to-br from-accent/30 to-secondary/20 overflow-hidden">
+              {b.cover_url ? (
+                <img
+                  src={b.cover_url}
+                  alt={b.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <div className="w-full h-full grid place-items-center text-primary/40 group-hover:text-primary/60 transition-colors">
+                  <BookOpen className="h-20 w-20" />
+                </div>
+              )}
             </div>
-            <h3 className="mt-4 font-display text-xl font-bold leading-tight line-clamp-2">{b.title}</h3>
-            {b.creator && (
-              <p className="mt-2 text-sm text-muted-foreground flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5" /> {b.creator}
-              </p>
-            )}
-            {b.subject && b.subject.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {b.subject.slice(0, 3).map((s) => (
-                  <span key={s} className="text-[11px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            )}
-            {b.identifier && (
-              <div className="mt-3 text-xs font-mono text-muted-foreground">📕 {b.identifier}</div>
-            )}
+            <div className="p-5 flex-1 flex flex-col">
+              <h3 className="font-display text-lg font-bold leading-tight line-clamp-2">{b.title}</h3>
+              {b.creator && (
+                <p className="mt-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
+                  <User className="h-3 w-3" /> {b.creator}
+                </p>
+              )}
+              {b.subject && b.subject.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {b.subject.slice(0, 2).map((s) => (
+                    <span key={s} className="text-[10px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {b.identifier && (
+                <div className="mt-auto pt-3 text-[11px] font-mono text-muted-foreground">📕 {b.identifier}</div>
+              )}
+            </div>
           </button>
         ))}
         {!loading && filtered.length === 0 && (

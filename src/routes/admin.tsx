@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Section } from "@/components/site/Section";
+import { CoverUploader } from "@/components/site/CoverUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Plus, BookOpen } from "lucide-react";
+import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -15,7 +16,24 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Book = { id: string; title: string; creator: string | null; identifier: string | null };
+const AUTH_KEY = "tbm-admin-auth";
+
+type Book = {
+  id: string;
+  title: string;
+  creator: string | null;
+  contributor: string | null;
+  subject: string[] | null;
+  publisher: string | null;
+  series: string | null;
+  language: string | null;
+  type: string | null;
+  identifier: string | null;
+  description: string | null;
+  coverage: string | null;
+  marc_record: string | null;
+  cover_url: string | null;
+};
 
 const empty = {
   title: "",
@@ -30,50 +48,143 @@ const empty = {
   description: "",
   coverage: "",
   marc_record: "",
+  cover_url: null as string | null,
 };
 
 function AdminPage() {
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAuthed(sessionStorage.getItem(AUTH_KEY) === "1");
+    }
+  }, []);
+
+  if (!authed) return <LoginGate onSuccess={() => setAuthed(true)} />;
+  return <Dashboard onLogout={() => { sessionStorage.removeItem(AUTH_KEY); setAuthed(false); }} />;
+}
+
+function LoginGate({ onSuccess }: { onSuccess: () => void }) {
+  const [u, setU] = useState("");
+  const [p, setP] = useState("");
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (u === "admin" && p === "admin123") {
+      sessionStorage.setItem(AUTH_KEY, "1");
+      toast.success("Selamat datang, Admin!");
+      onSuccess();
+    } else {
+      toast.error("Username atau password salah");
+    }
+  };
+
+  return (
+    <Section eyebrow="Area Terbatas" title="Login Admin 🔐" subtitle="Masuk untuk mengelola koleksi buku.">
+      <form onSubmit={submit} className="max-w-sm rounded-3xl bg-card border border-border/60 p-7 shadow-soft space-y-4">
+        <div className="grid place-items-center h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground mx-auto">
+          <Lock className="h-6 w-6" />
+        </div>
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</label>
+          <input
+            value={u}
+            onChange={(e) => setU(e.target.value)}
+            className="mt-1.5 w-full rounded-xl border-2 border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
+            autoComplete="username"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</label>
+          <input
+            type="password"
+            value={p}
+            onChange={(e) => setP(e.target.value)}
+            className="mt-1.5 w-full rounded-xl border-2 border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
+            autoComplete="current-password"
+          />
+        </div>
+        <button
+          type="submit"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-soft hover:translate-y-[-2px] transition-transform"
+        >
+          Masuk
+        </button>
+      </form>
+    </Section>
+  );
+}
+
+function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [books, setBooks] = useState<Book[]>([]);
-  const [form, setForm] = useState(empty);
+  const [editor, setEditor] = useState<{ open: boolean; data: typeof empty; id: string | null }>({
+    open: false,
+    data: empty,
+    id: null,
+  });
   const [saving, setSaving] = useState(false);
 
   const load = () =>
     supabase
       .from("books")
-      .select("id,title,creator,identifier")
+      .select("*")
       .order("created_at", { ascending: false })
       .then(({ data }) => setBooks((data as Book[]) ?? []));
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim()) return toast.error("Judul wajib diisi");
-    setSaving(true);
-    const subjects = form.subject.split(";").map((s) => s.trim()).filter(Boolean);
-    const { error } = await supabase.from("books").insert({
-      title: form.title,
-      creator: form.creator || null,
-      contributor: form.contributor || null,
-      subject: subjects,
-      publisher: form.publisher || null,
-      series: form.series || null,
-      language: form.language || null,
-      type: form.type || null,
-      identifier: form.identifier || null,
-      description: form.description || null,
-      coverage: form.coverage || null,
-      marc_record: form.marc_record || null,
+  const openNew = () => setEditor({ open: true, data: empty, id: null });
+  const openEdit = (b: Book) =>
+    setEditor({
+      open: true,
+      id: b.id,
+      data: {
+        title: b.title,
+        creator: b.creator ?? "",
+        contributor: b.contributor ?? "",
+        subject: (b.subject ?? []).join("; "),
+        publisher: b.publisher ?? "",
+        series: b.series ?? "",
+        language: b.language ?? "ind",
+        type: b.type ?? "Text",
+        identifier: b.identifier ?? "",
+        description: b.description ?? "",
+        coverage: b.coverage ?? "",
+        marc_record: b.marc_record ?? "",
+        cover_url: b.cover_url,
+      },
     });
+
+  const set = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setEditor((s) => ({ ...s, data: { ...s.data, [k]: e.target.value } }));
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editor.data.title.trim()) return toast.error("Judul wajib diisi");
+    setSaving(true);
+    const f = editor.data;
+    const payload = {
+      title: f.title,
+      creator: f.creator || null,
+      contributor: f.contributor || null,
+      subject: f.subject.split(";").map((s) => s.trim()).filter(Boolean),
+      publisher: f.publisher || null,
+      series: f.series || null,
+      language: f.language || null,
+      type: f.type || null,
+      identifier: f.identifier || null,
+      description: f.description || null,
+      coverage: f.coverage || null,
+      marc_record: f.marc_record || null,
+      cover_url: f.cover_url,
+    };
+    const res = editor.id
+      ? await supabase.from("books").update(payload).eq("id", editor.id)
+      : await supabase.from("books").insert(payload);
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Buku ditambahkan!");
-    setForm(empty);
+    if (res.error) return toast.error(res.error.message);
+    toast.success(editor.id ? "Buku diperbarui" : "Buku ditambahkan");
+    setEditor({ open: false, data: empty, id: null });
     load();
   };
 
@@ -88,64 +199,119 @@ function AdminPage() {
   return (
     <Section
       eyebrow="Dashboard Admin"
-      title="Kelola Koleksi Buku"
-      subtitle="Tambahkan buku baru sesuai standar Dublin Core / MARC 21."
+      title="Kelola Koleksi Buku 📚"
+      subtitle="Tambah, ubah, dan hapus buku sesuai standar Dublin Core / MARC 21."
     >
-      <div className="grid lg:grid-cols-[1fr_360px] gap-8">
-        <form onSubmit={submit} className="rounded-3xl bg-card border border-border/60 p-7 shadow-soft space-y-4">
-          <h3 className="font-display text-xl font-bold flex items-center gap-2">
-            <Plus className="h-5 w-5 text-primary" /> Buku Baru
-          </h3>
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <button
+          onClick={openNew}
+          className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold shadow-soft hover:translate-y-[-2px] transition-transform"
+        >
+          <Plus className="h-4 w-4" /> Tambah Buku
+        </button>
+        <Link to="/koleksi" className="text-sm font-semibold text-primary hover:underline">
+          Lihat halaman publik →
+        </Link>
+        <button
+          onClick={onLogout}
+          className="ml-auto inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-destructive"
+        >
+          <LogOut className="h-4 w-4" /> Logout
+        </button>
+      </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Title (DC/245)" required value={form.title} onChange={set("title")} />
-            <Field label="Creator (DC/100)" value={form.creator} onChange={set("creator")} placeholder="Penulis (usia)" />
-            <Field label="Contributor (700)" value={form.contributor} onChange={set("contributor")} />
-            <Field label="Publisher (DC/260)" value={form.publisher} onChange={set("publisher")} />
-            <Field label="Series (490/830)" value={form.series} onChange={set("series")} />
-            <Field label="Identifier / Call No." value={form.identifier} onChange={set("identifier")} placeholder="899.2213 ABC" />
-            <Field label="Language" value={form.language} onChange={set("language")} placeholder="ind" />
-            <Field label="Type" value={form.type} onChange={set("type")} placeholder="Text" />
-            <Field label="Coverage" value={form.coverage} onChange={set("coverage")} />
-            <Field label="Subject (pisahkan ;)" value={form.subject} onChange={set("subject")} placeholder="Fiksi Anak; Misteri" />
-          </div>
-
-          <Area label="Description" value={form.description} onChange={set("description")} />
-          <Area label="MARC 21 Record (raw)" value={form.marc_record} onChange={set("marc_record")} rows={6} mono />
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-soft hover:translate-y-[-2px] transition-transform disabled:opacity-60"
-          >
-            {saving ? "Menyimpan…" : "Simpan Buku"}
-          </button>
-        </form>
-
-        <aside className="rounded-3xl bg-card border border-border/60 p-6 shadow-soft h-fit">
-          <h4 className="font-display font-bold text-lg flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" /> {books.length} Buku
-          </h4>
-          <Link to="/koleksi" className="text-xs text-primary font-semibold hover:underline">Lihat halaman publik →</Link>
-          <ul className="mt-4 space-y-2 max-h-[600px] overflow-y-auto">
-            {books.map((b) => (
-              <li key={b.id} className="flex items-start gap-2 p-3 rounded-xl bg-muted/40 group">
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm truncate">{b.title}</div>
-                  <div className="text-xs text-muted-foreground truncate">{b.creator ?? "—"}</div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {books.map((b) => (
+          <div key={b.id} className="group rounded-3xl bg-card border border-border/60 overflow-hidden shadow-soft flex flex-col">
+            <div className="aspect-[3/4] bg-muted overflow-hidden">
+              {b.cover_url ? (
+                <img src={b.cover_url} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              ) : (
+                <div className="w-full h-full grid place-items-center text-primary/40">
+                  <BookOpen className="h-16 w-16" />
                 </div>
+              )}
+            </div>
+            <div className="p-4 flex-1 flex flex-col">
+              <h3 className="font-display font-bold leading-tight line-clamp-2">{b.title}</h3>
+              <p className="text-xs text-muted-foreground mt-1">{b.creator ?? "—"}</p>
+              <div className="mt-auto pt-3 flex gap-2">
+                <button
+                  onClick={() => openEdit(b)}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary/10 text-primary px-3 py-2 text-xs font-bold hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Edit
+                </button>
                 <button
                   onClick={() => remove(b.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 p-1.5 rounded-lg"
+                  className="inline-flex items-center justify-center rounded-xl bg-destructive/10 text-destructive px-3 py-2 text-xs font-bold hover:bg-destructive hover:text-destructive-foreground transition-colors"
                   aria-label="Hapus"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {editor.open && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 backdrop-blur-sm p-4 animate-[fade-in-up_0.2s_ease-out]">
+          <form
+            onSubmit={save}
+            className="bg-card rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-7 shadow-soft border border-border space-y-4"
+          >
+            <div className="flex justify-between items-center">
+              <h3 className="font-display text-2xl font-bold">{editor.id ? "Edit Buku" : "Buku Baru"}</h3>
+              <button
+                type="button"
+                onClick={() => setEditor({ open: false, data: empty, id: null })}
+                className="text-muted-foreground hover:text-foreground p-2"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <CoverUploader
+              value={editor.data.cover_url}
+              onChange={(url) => setEditor((s) => ({ ...s, data: { ...s.data, cover_url: url } }))}
+            />
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Title (245)" required value={editor.data.title} onChange={set("title")} />
+              <Field label="Creator (100)" value={editor.data.creator} onChange={set("creator")} placeholder="Penulis (usia)" />
+              <Field label="Contributor (700)" value={editor.data.contributor} onChange={set("contributor")} />
+              <Field label="Publisher (260)" value={editor.data.publisher} onChange={set("publisher")} />
+              <Field label="Series (490/830)" value={editor.data.series} onChange={set("series")} />
+              <Field label="Identifier / Call No." value={editor.data.identifier} onChange={set("identifier")} placeholder="899.2213 ABC" />
+              <Field label="Language" value={editor.data.language} onChange={set("language")} placeholder="ind" />
+              <Field label="Type" value={editor.data.type} onChange={set("type")} placeholder="Text" />
+              <Field label="Coverage" value={editor.data.coverage} onChange={set("coverage")} />
+              <Field label="Subject (pisah ;)" value={editor.data.subject} onChange={set("subject")} placeholder="Fiksi Anak; Misteri" />
+            </div>
+
+            <Area label="Description" value={editor.data.description} onChange={set("description")} />
+            <Area label="MARC 21 Record (raw)" value={editor.data.marc_record} onChange={set("marc_record")} rows={6} mono />
+
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setEditor({ open: false, data: empty, id: null })}
+                className="rounded-full px-5 py-2.5 text-sm font-bold hover:bg-muted"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-soft hover:translate-y-[-2px] transition-transform disabled:opacity-60"
+              >
+                {saving ? "Menyimpan…" : "Simpan"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </Section>
   );
 }

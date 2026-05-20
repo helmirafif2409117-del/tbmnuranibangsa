@@ -36,13 +36,13 @@ export function Footer() {
         <div>
           <h4 className="font-bold mb-3">Terhubung</h4>
           <div className="flex gap-2">
-            <a href="#" aria-label="Instagram" className="grid place-items-center h-10 w-10 rounded-xl bg-accent/60 hover:bg-accent transition-colors">
+            <a href="https://instagram.com/tbmnuranibangsa" target="_blank" rel="noreferrer" aria-label="Instagram" className="grid place-items-center h-10 w-10 rounded-xl bg-accent/60 hover:bg-accent transition-colors">
               <Instagram className="h-4 w-4" />
             </a>
             <a href="#" aria-label="Facebook" className="grid place-items-center h-10 w-10 rounded-xl bg-accent/60 hover:bg-accent transition-colors">
               <Facebook className="h-4 w-4" />
             </a>
-            <a href="mailto:halo@tbmnuranibangsa.id" aria-label="Email" className="grid place-items-center h-10 w-10 rounded-xl bg-accent/60 hover:bg-accent transition-colors">
+            <a href="mailto:tbmnuranibangsa21@gmail.com" aria-label="Email" className="grid place-items-center h-10 w-10 rounded-xl bg-accent/60 hover:bg-accent transition-colors">
               <Mail className="h-4 w-4" />
             </a>
           </div>

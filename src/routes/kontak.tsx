@@ -47,7 +47,8 @@ function ContactPage() {
             { icon: MapPin, title: "Alamat", value: ADDRESS, color: "bg-primary/10 text-primary" },
             { icon: Clock, title: "Jam Buka", value: "Senin – Sabtu · 15.00 – 17.30", color: "bg-secondary/15 text-secondary" },
             { icon: Phone, title: "Telepon", value: "+62 812-3456-7890", color: "bg-accent/50 text-foreground" },
-            { icon: Mail, title: "Email", value: "halo@tbmnuranibangsa.id", color: "bg-primary/10 text-primary" },
+            { icon: Mail, title: "Email", value: "tbmnuranibangsa21@gmail.com", color: "bg-primary/10 text-primary" },
+            { icon: Mail, title: "Instagram", value: "@tbmnuranibangsa", color: "bg-secondary/15 text-secondary" },
           ].map((c) => (
             <div key={c.title} className="flex items-start gap-4 rounded-2xl bg-card border border-border/60 p-5">
               <div className={`grid place-items-center h-12 w-12 rounded-xl shrink-0 ${c.color}`}>

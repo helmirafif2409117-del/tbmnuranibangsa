@@ -6,7 +6,7 @@ import { Search, BookOpen, User, Tag, Library, X, Filter } from "lucide-react";
 
 type FilterField = "all" | "title" | "creator" | "subject";
 
-export const Route = createFileRoute("/koleksi")({
+export const Route = createFileRoute("/koleksi/")({
   head: () => ({
     meta: [
       { title: "Koleksi Buku — TBM Nurani Bangsa" },

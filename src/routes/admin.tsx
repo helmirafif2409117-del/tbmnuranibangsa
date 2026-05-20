@@ -210,6 +210,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         >
           <Plus className="h-4 w-4" /> Tambah Buku
         </button>
+        <ImportExport books={books} reload={load} />
         <Link to="/koleksi" className="text-sm font-semibold text-primary hover:underline">
           Lihat halaman publik →
         </Link>

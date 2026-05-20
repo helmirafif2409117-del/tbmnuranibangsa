@@ -48,18 +48,28 @@ function BookDetailPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [neighbors, setNeighbors] = useState<{ prev: string | null; next: string | null; index: number; total: number }>({ prev: null, next: null, index: 0, total: 0 });
 
   useEffect(() => {
-    supabase
-      .from("books")
-      .select("*")
-      .eq("id", bookId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) setNotFound(true);
-        else setBook(data as Book);
-        setLoading(false);
+    let active = true;
+    Promise.all([
+      supabase.from("books").select("*").eq("id", bookId).maybeSingle(),
+      supabase.from("books").select("id").order("created_at", { ascending: false }),
+    ]).then(([detail, list]) => {
+      if (!active) return;
+      if (!detail.data) setNotFound(true);
+      else setBook(detail.data as Book);
+      const ids = (list.data as { id: string }[] | null) ?? [];
+      const i = ids.findIndex((x) => x.id === bookId);
+      setNeighbors({
+        prev: i > 0 ? ids[i - 1].id : null,
+        next: i >= 0 && i < ids.length - 1 ? ids[i + 1].id : null,
+        index: i,
+        total: ids.length,
       });
+      setLoading(false);
+    });
+    return () => { active = false; };
   }, [bookId]);
 
   if (loading) {

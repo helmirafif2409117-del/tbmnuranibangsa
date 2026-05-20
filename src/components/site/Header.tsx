@@ -44,8 +44,15 @@ export function Header() {
             </Link>
           ))}
           <Link
+            to="/admin"
+            className="ml-2 inline-flex items-center gap-1.5 rounded-full border-2 border-primary/30 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/10 transition-colors"
+            title="Login Admin"
+          >
+            🔐 Admin
+          </Link>
+          <Link
             to="/kontak"
-            className="ml-2 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-soft hover:translate-y-[-2px] transition-transform"
+            className="ml-1 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-soft hover:translate-y-[-2px] transition-transform"
           >
             Kunjungi Kami
           </Link>

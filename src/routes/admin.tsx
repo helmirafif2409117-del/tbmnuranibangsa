@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Section } from "@/components/site/Section";
 import { CoverUploader } from "@/components/site/CoverUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X } from "lucide-react";
+import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload } from "lucide-react";
+import { parseCsv, rowsToBooks, toCsv, downloadCsv } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -209,6 +210,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         >
           <Plus className="h-4 w-4" /> Tambah Buku
         </button>
+        <ImportExport books={books} reload={load} />
         <Link to="/koleksi" className="text-sm font-semibold text-primary hover:underline">
           Lihat halaman publik →
         </Link>
@@ -340,5 +342,75 @@ function Area({
         className={`mt-1.5 w-full rounded-xl border-2 border-input bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary ${mono ? "font-mono text-xs" : ""}`}
       />
     </div>
+  );
+}
+
+function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const onExport = () => {
+    const csv = toCsv(books.map((b) => ({
+      title: b.title,
+      creator: b.creator, contributor: b.contributor,
+      subject: b.subject ?? [], publisher: b.publisher, series: b.series,
+      language: b.language, type: b.type, identifier: b.identifier,
+      description: b.description, coverage: b.coverage,
+      marc_record: b.marc_record, cover_url: b.cover_url,
+    })));
+    downloadCsv(`koleksi-buku-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+    toast.success(`${books.length} buku diekspor`);
+  };
+
+  const onImport = async (f: File | null) => {
+    if (!f) return;
+    setBusy(true);
+    try {
+      const text = await f.text();
+      const rows = parseCsv(text);
+      const { books: parsed, format } = rowsToBooks(rows);
+      if (parsed.length === 0) {
+        toast.error("Tidak ada baris valid (kolom 'title' wajib ada)");
+        return;
+      }
+      const label = format === "marc" ? "MARC 21" : format === "dublin-core" ? "Dublin Core" : "Generik";
+      const ok = confirm(`Terdeteksi format: ${label}\nAkan menambahkan ${parsed.length} buku. Lanjutkan?`);
+      if (!ok) return;
+      const { error } = await supabase.from("books").insert(parsed);
+      if (error) throw error;
+      toast.success(`${parsed.length} buku (${label}) berhasil diimpor`);
+      reload();
+    } catch (e: any) {
+      toast.error(e.message ?? "Gagal mengimpor CSV");
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  return (
+    <>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".csv,text/csv"
+        onChange={(e) => onImport(e.target.files?.[0] ?? null)}
+        className="hidden"
+      />
+      <button
+        onClick={() => fileRef.current?.click()}
+        disabled={busy}
+        className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary disabled:opacity-60"
+        title="Auto-detect MARC 21 atau Dublin Core"
+      >
+        <Upload className="h-4 w-4" /> {busy ? "Mengimpor…" : "Import CSV"}
+      </button>
+      <button
+        onClick={onExport}
+        className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
+      >
+        <Download className="h-4 w-4" /> Export CSV
+      </button>
+    </>
   );
 }

@@ -1,8 +1,8 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Section } from "@/components/site/Section";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, User, Tag, Globe, FileText, Hash, Building2, Layers, MapPin } from "lucide-react";
+import { ArrowLeft, BookOpen, User, Tag, Globe, FileText, Hash, Building2, Layers, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/koleksi/$bookId")({
   head: ({ params }) => ({
@@ -48,18 +48,28 @@ function BookDetailPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [neighbors, setNeighbors] = useState<{ prev: string | null; next: string | null; index: number; total: number }>({ prev: null, next: null, index: 0, total: 0 });
 
   useEffect(() => {
-    supabase
-      .from("books")
-      .select("*")
-      .eq("id", bookId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) setNotFound(true);
-        else setBook(data as Book);
-        setLoading(false);
+    let active = true;
+    Promise.all([
+      supabase.from("books").select("*").eq("id", bookId).maybeSingle(),
+      supabase.from("books").select("id").order("created_at", { ascending: false }),
+    ]).then(([detail, list]) => {
+      if (!active) return;
+      if (!detail.data) setNotFound(true);
+      else setBook(detail.data as Book);
+      const ids = (list.data as { id: string }[] | null) ?? [];
+      const i = ids.findIndex((x) => x.id === bookId);
+      setNeighbors({
+        prev: i > 0 ? ids[i - 1].id : null,
+        next: i >= 0 && i < ids.length - 1 ? ids[i + 1].id : null,
+        index: i,
+        total: ids.length,
       });
+      setLoading(false);
+    });
+    return () => { active = false; };
   }, [bookId]);
 
   if (loading) {
@@ -83,9 +93,44 @@ function BookDetailPage() {
 
   return (
     <Section eyebrow="Detail Koleksi" title={book.title}>
-      <Link to="/koleksi" className="inline-flex items-center gap-2 text-sm text-primary font-semibold hover:underline mb-6">
-        <ArrowLeft className="h-4 w-4" /> Kembali ke Koleksi
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <Link to="/koleksi" className="inline-flex items-center gap-2 text-sm text-primary font-semibold hover:underline">
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Koleksi
+        </Link>
+        <div className="flex items-center gap-2">
+          {neighbors.prev ? (
+            <Link
+              to="/koleksi/$bookId"
+              params={{ bookId: neighbors.prev }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" /> Sebelumnya
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-xs font-bold text-muted-foreground opacity-50">
+              <ChevronLeft className="h-4 w-4" /> Sebelumnya
+            </span>
+          )}
+          {neighbors.total > 0 && (
+            <span className="text-xs font-bold text-muted-foreground px-2">
+              {neighbors.index + 1} / {neighbors.total}
+            </span>
+          )}
+          {neighbors.next ? (
+            <Link
+              to="/koleksi/$bookId"
+              params={{ bookId: neighbors.next }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+            >
+              Berikutnya <ChevronRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-xs font-bold text-muted-foreground opacity-50">
+              Berikutnya <ChevronRight className="h-4 w-4" />
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-[300px_1fr] gap-8">
         <div className="space-y-4">

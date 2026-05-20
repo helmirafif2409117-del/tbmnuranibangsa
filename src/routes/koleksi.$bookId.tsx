@@ -93,9 +93,44 @@ function BookDetailPage() {
 
   return (
     <Section eyebrow="Detail Koleksi" title={book.title}>
-      <Link to="/koleksi" className="inline-flex items-center gap-2 text-sm text-primary font-semibold hover:underline mb-6">
-        <ArrowLeft className="h-4 w-4" /> Kembali ke Koleksi
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <Link to="/koleksi" className="inline-flex items-center gap-2 text-sm text-primary font-semibold hover:underline">
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Koleksi
+        </Link>
+        <div className="flex items-center gap-2">
+          {neighbors.prev ? (
+            <Link
+              to="/koleksi/$bookId"
+              params={{ bookId: neighbors.prev }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" /> Sebelumnya
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-xs font-bold text-muted-foreground opacity-50">
+              <ChevronLeft className="h-4 w-4" /> Sebelumnya
+            </span>
+          )}
+          {neighbors.total > 0 && (
+            <span className="text-xs font-bold text-muted-foreground px-2">
+              {neighbors.index + 1} / {neighbors.total}
+            </span>
+          )}
+          {neighbors.next ? (
+            <Link
+              to="/koleksi/$bookId"
+              params={{ bookId: neighbors.next }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+            >
+              Berikutnya <ChevronRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-xs font-bold text-muted-foreground opacity-50">
+              Berikutnya <ChevronRight className="h-4 w-4" />
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-[300px_1fr] gap-8">
         <div className="space-y-4">

@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Section } from "@/components/site/Section";
 import { CoverUploader } from "@/components/site/CoverUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X } from "lucide-react";
+import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload } from "lucide-react";
+import { parseCsv, rowsToBooks, toCsv, downloadCsv } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

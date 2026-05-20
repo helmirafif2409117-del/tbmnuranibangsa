@@ -54,9 +54,9 @@ const KoleksiIndexRoute = KoleksiIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const KoleksiBookIdRoute = KoleksiBookIdRouteImport.update({
-  id: '/$bookId',
-  path: '/$bookId',
-  getParentRoute: () => KoleksiRoute,
+  id: '/koleksi/$bookId',
+  path: '/koleksi/$bookId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -130,6 +130,7 @@ export interface RootRouteChildren {
   KontakRoute: typeof KontakRoute
   ProgramRoute: typeof ProgramRoute
   TentangRoute: typeof TentangRoute
+  KoleksiBookIdRoute: typeof KoleksiBookIdRoute
   KoleksiIndexRoute: typeof KoleksiIndexRoute
 }
 
@@ -186,10 +187,10 @@ declare module '@tanstack/react-router' {
     }
     '/koleksi/$bookId': {
       id: '/koleksi/$bookId'
-      path: '/$bookId'
+      path: '/koleksi/$bookId'
       fullPath: '/koleksi/$bookId'
       preLoaderRoute: typeof KoleksiBookIdRouteImport
-      parentRoute: typeof KoleksiRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -201,17 +202,9 @@ const rootRouteChildren: RootRouteChildren = {
   KontakRoute: KontakRoute,
   ProgramRoute: ProgramRoute,
   TentangRoute: TentangRoute,
+  KoleksiBookIdRoute: KoleksiBookIdRoute,
   KoleksiIndexRoute: KoleksiIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

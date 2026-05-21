@@ -133,6 +133,22 @@ function BookDetailPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 mb-6">
+        <span className="text-xs font-bold text-muted-foreground self-center mr-1">Export buku ini:</span>
+        <button
+          onClick={() => exportOne(book, "dc")}
+          className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" /> Dublin Core CSV
+        </button>
+        <button
+          onClick={() => exportOne(book, "marc")}
+          className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" /> MARC 21 CSV
+        </button>
+      </div>
+
       <div className="grid md:grid-cols-[300px_1fr] gap-8">
         <div className="space-y-4">
           <div className="aspect-[3/4] rounded-3xl overflow-hidden bg-gradient-to-br from-accent/30 to-secondary/20 shadow-soft border border-border/60">

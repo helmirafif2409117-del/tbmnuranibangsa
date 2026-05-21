@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Section } from "@/components/site/Section";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, User, Tag, Globe, FileText, Hash, Building2, Layers, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { buildMarcRecord } from "@/lib/book-csv";
+import { ArrowLeft, BookOpen, User, Tag, Globe, FileText, Hash, Building2, Layers, MapPin, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { buildMarcRecord, toCsv, toMarcCsv, downloadCsv, type BookRow } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/koleksi/$bookId")({
   head: ({ params }) => ({

@@ -274,10 +274,30 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               </button>
             </div>
 
+            <GoogleBooksSearch
+              onPick={(d) =>
+                setEditor((s) => ({
+                  ...s,
+                  data: {
+                    ...s.data,
+                    title: d.title || s.data.title,
+                    creator: d.creator || s.data.creator,
+                    publisher: d.publisher || s.data.publisher,
+                    description: d.description || s.data.description,
+                    identifier: d.identifier || s.data.identifier,
+                    subject: d.subject || s.data.subject,
+                    language: d.language || s.data.language,
+                    cover_url: d.cover_url || s.data.cover_url,
+                  },
+                }))
+              }
+            />
+
             <CoverUploader
               value={editor.data.cover_url}
               onChange={(url) => setEditor((s) => ({ ...s, data: { ...s.data, cover_url: url } }))}
             />
+
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Title (245)" required value={editor.data.title} onChange={set("title")} />

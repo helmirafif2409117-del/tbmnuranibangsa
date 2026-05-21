@@ -65,6 +65,68 @@ export function toCsv(books: BookRow[]): string {
   return lines.join("\n");
 }
 
+// MARC 21 CSV export — kolomnya pakai tag MARC ($subfield)
+export function toMarcCsv(books: BookRow[]): string {
+  const headers = [
+    "LDR","008","020$a","041$a","082$a",
+    "100$a","245$a","260$a","260$b",
+    "490$a","520$a","650$a","651$a",
+    "700$a","830$a","cover_url",
+  ];
+  const lines = [headers.join(",")];
+  for (const b of books) {
+    const parts = (b.publisher ?? "").split(":").map((s) => s.trim());
+    const place = parts.length > 1 ? parts[0] : "";
+    const pub = parts.length > 1 ? parts.slice(1).join(":").trim() : (b.publisher ?? "");
+    const row: Record<string, string> = {
+      "LDR": "00000nam a2200000 a 4500",
+      "008": b.language ?? "ind",
+      "020$a": b.identifier ?? "",
+      "041$a": b.language ?? "",
+      "082$a": b.identifier ?? "",
+      "100$a": b.creator ?? "",
+      "245$a": b.title,
+      "260$a": place,
+      "260$b": pub,
+      "490$a": b.series ?? "",
+      "520$a": b.description ?? "",
+      "650$a": (b.subject ?? []).join("; "),
+      "651$a": b.coverage ?? "",
+      "700$a": b.contributor ?? "",
+      "830$a": b.series ?? "",
+      "cover_url": b.cover_url ?? "",
+    };
+    lines.push(headers.map((h) => csvEscape(row[h] ?? "")).join(","));
+  }
+  return lines.join("\n");
+}
+
+// Bangun string MARC 21 dari data buku (dipakai bila marc_record kosong).
+export function buildMarcRecord(b: {
+  title: string; creator?: string | null; contributor?: string | null;
+  subject?: string[] | null; publisher?: string | null; series?: string | null;
+  language?: string | null; identifier?: string | null; description?: string | null;
+  coverage?: string | null;
+}): string {
+  const lines: string[] = [];
+  lines.push("LDR 00000nam a2200000 a 4500");
+  if (b.language) lines.push(`008    ${b.language}`);
+  if (b.identifier) lines.push(`020    $a ${b.identifier}`);
+  if (b.creator) lines.push(`100 1  $a ${b.creator}`);
+  lines.push(`245 00 $a ${b.title}.`);
+  if (b.publisher) {
+    const parts = b.publisher.split(":").map((s) => s.trim());
+    if (parts.length > 1) lines.push(`260    $a ${parts[0]} : $b ${parts.slice(1).join(":").trim()}`);
+    else lines.push(`260    $b ${b.publisher}`);
+  }
+  if (b.description) lines.push(`520    $a ${b.description}`);
+  for (const s of (b.subject ?? [])) lines.push(`650  0 $a ${s}`);
+  if (b.coverage) lines.push(`651  0 $a ${b.coverage}`);
+  if (b.contributor) lines.push(`700 1  $a ${b.contributor}, $e contributor.`);
+  if (b.series) lines.push(`830  0 $a ${b.series}`);
+  return lines.join("\n");
+}
+
 // ---------- Format autodetect ----------
 export type DetectedFormat = "marc" | "dublin-core" | "unknown";
 

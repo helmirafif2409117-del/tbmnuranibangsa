@@ -5,7 +5,7 @@ import { CoverUploader } from "@/components/site/CoverUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload } from "lucide-react";
-import { parseCsv, rowsToBooks, toCsv, downloadCsv } from "@/lib/book-csv";
+import { parseCsv, rowsToBooks, toCsv, toMarcCsv, downloadCsv } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -349,18 +349,25 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
-  const onExport = () => {
-    const csv = toCsv(books.map((b) => ({
-      title: b.title,
-      creator: b.creator, contributor: b.contributor,
-      subject: b.subject ?? [], publisher: b.publisher, series: b.series,
-      language: b.language, type: b.type, identifier: b.identifier,
-      description: b.description, coverage: b.coverage,
-      marc_record: b.marc_record, cover_url: b.cover_url,
-    })));
-    downloadCsv(`koleksi-buku-${new Date().toISOString().slice(0, 10)}.csv`, csv);
-    toast.success(`${books.length} buku diekspor`);
+  const mapBooks = () => books.map((b) => ({
+    title: b.title,
+    creator: b.creator, contributor: b.contributor,
+    subject: b.subject ?? [], publisher: b.publisher, series: b.series,
+    language: b.language, type: b.type, identifier: b.identifier,
+    description: b.description, coverage: b.coverage,
+    marc_record: b.marc_record, cover_url: b.cover_url,
+  }));
+
+  const onExportDC = () => {
+    downloadCsv(`koleksi-dublincore-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(mapBooks()));
+    toast.success(`${books.length} buku diekspor (Dublin Core)`);
   };
+
+  const onExportMarc = () => {
+    downloadCsv(`koleksi-marc21-${new Date().toISOString().slice(0, 10)}.csv`, toMarcCsv(mapBooks()));
+    toast.success(`${books.length} buku diekspor (MARC 21)`);
+  };
+
 
   const onImport = async (f: File | null) => {
     if (!f) return;
@@ -406,10 +413,16 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
         <Upload className="h-4 w-4" /> {busy ? "Mengimpor…" : "Import CSV"}
       </button>
       <button
-        onClick={onExport}
+        onClick={onExportDC}
         className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
       >
-        <Download className="h-4 w-4" /> Export CSV
+        <Download className="h-4 w-4" /> Export Dublin Core
+      </button>
+      <button
+        onClick={onExportMarc}
+        className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
+      >
+        <Download className="h-4 w-4" /> Export MARC 21
       </button>
     </>
   );

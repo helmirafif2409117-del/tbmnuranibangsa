@@ -4,7 +4,7 @@ import { Section } from "@/components/site/Section";
 import { CoverUploader } from "@/components/site/CoverUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload } from "lucide-react";
+import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload, Eye } from "lucide-react";
 import { parseCsv, rowsToBooks, toCsv, toMarcCsv, downloadCsv } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/admin")({
@@ -348,6 +348,7 @@ function Area({
 function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<{ kind: "marc" | "dc"; csv: string } | null>(null);
 
   const mapBooks = () => books.map((b) => ({
     title: b.title,
@@ -358,16 +359,25 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
     marc_record: b.marc_record, cover_url: b.cover_url,
   }));
 
-  const onExportDC = () => {
-    downloadCsv(`koleksi-dublincore-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(mapBooks()));
-    toast.success(`${books.length} buku diekspor (Dublin Core)`);
+  const buildCsv = (kind: "marc" | "dc") =>
+    kind === "marc" ? toMarcCsv(mapBooks()) : toCsv(mapBooks());
+
+  const filename = (kind: "marc" | "dc") =>
+    kind === "marc"
+      ? `koleksi-marc21-${new Date().toISOString().slice(0, 10)}.csv`
+      : `koleksi-dublincore-${new Date().toISOString().slice(0, 10)}.csv`;
+
+  const openPreview = (kind: "marc" | "dc") => {
+    if (books.length === 0) return toast.error("Belum ada buku untuk diekspor");
+    setPreview({ kind, csv: buildCsv(kind) });
   };
 
-  const onExportMarc = () => {
-    downloadCsv(`koleksi-marc21-${new Date().toISOString().slice(0, 10)}.csv`, toMarcCsv(mapBooks()));
-    toast.success(`${books.length} buku diekspor (MARC 21)`);
+  const downloadFromPreview = () => {
+    if (!preview) return;
+    downloadCsv(filename(preview.kind), preview.csv);
+    toast.success(`${books.length} buku diekspor (${preview.kind === "marc" ? "MARC 21" : "Dublin Core"})`);
+    setPreview(null);
   };
-
 
   const onImport = async (f: File | null) => {
     if (!f) return;
@@ -410,20 +420,57 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
         className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary disabled:opacity-60"
         title="Auto-detect MARC 21 atau Dublin Core"
       >
-        <Upload className="h-4 w-4" /> {busy ? "Mengimpor…" : "Import CSV"}
+        <Upload className="h-4 w-4" /> {busy ? "Mengimpor…" : "Import CSV (MARC / Dublin Core)"}
       </button>
       <button
-        onClick={onExportDC}
+        onClick={() => openPreview("dc")}
         className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
       >
-        <Download className="h-4 w-4" /> Export Dublin Core
+        <Eye className="h-4 w-4" /> Preview Dublin Core
       </button>
       <button
-        onClick={onExportMarc}
+        onClick={() => openPreview("marc")}
         className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
       >
-        <Download className="h-4 w-4" /> Export MARC 21
+        <Eye className="h-4 w-4" /> Preview MARC 21
       </button>
+
+      {preview && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 backdrop-blur-sm p-4">
+          <div className="bg-card rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col p-6 shadow-soft border border-border">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-display text-xl font-bold">
+                  Preview {preview.kind === "marc" ? "MARC 21" : "Dublin Core"} CSV
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {books.length} buku · {filename(preview.kind)}
+                </p>
+              </div>
+              <button onClick={() => setPreview(null)} className="text-muted-foreground hover:text-foreground p-2">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <pre className="flex-1 overflow-auto bg-muted rounded-2xl p-4 text-[11px] font-mono whitespace-pre border border-border">
+              {preview.csv.length > 8000 ? preview.csv.slice(0, 8000) + "\n\n… (dipotong untuk preview)" : preview.csv}
+            </pre>
+            <div className="flex gap-3 justify-end pt-4">
+              <button
+                onClick={() => setPreview(null)}
+                className="rounded-full px-5 py-2.5 text-sm font-bold hover:bg-muted"
+              >
+                Batal
+              </button>
+              <button
+                onClick={downloadFromPreview}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-soft hover:translate-y-[-2px] transition-transform"
+              >
+                <Download className="h-4 w-4" /> Download CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

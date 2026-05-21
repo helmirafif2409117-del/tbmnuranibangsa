@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Section } from "@/components/site/Section";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, User, Tag, Globe, FileText, Hash, Building2, Layers, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { buildMarcRecord } from "@/lib/book-csv";
+import { ArrowLeft, BookOpen, User, Tag, Globe, FileText, Hash, Building2, Layers, MapPin, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { buildMarcRecord, toCsv, toMarcCsv, downloadCsv, type BookRow } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/koleksi/$bookId")({
   head: ({ params }) => ({
@@ -133,6 +133,22 @@ function BookDetailPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 mb-6">
+        <span className="text-xs font-bold text-muted-foreground self-center mr-1">Export buku ini:</span>
+        <button
+          onClick={() => exportOne(book, "dc")}
+          className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" /> Dublin Core CSV
+        </button>
+        <button
+          onClick={() => exportOne(book, "marc")}
+          className="inline-flex items-center gap-1.5 rounded-full bg-card border-2 border-border px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" /> MARC 21 CSV
+        </button>
+      </div>
+
       <div className="grid md:grid-cols-[300px_1fr] gap-8">
         <div className="space-y-4">
           <div className="aspect-[3/4] rounded-3xl overflow-hidden bg-gradient-to-br from-accent/30 to-secondary/20 shadow-soft border border-border/60">
@@ -191,6 +207,24 @@ function BookDetailPage() {
       </div>
     </Section>
   );
+}
+
+function bookToRow(b: Book): BookRow {
+  return {
+    title: b.title, creator: b.creator, contributor: b.contributor,
+    subject: b.subject ?? [], publisher: b.publisher, series: b.series,
+    language: b.language, type: b.type, identifier: b.identifier,
+    description: b.description, coverage: b.coverage,
+    marc_record: b.marc_record, cover_url: b.cover_url,
+  };
+}
+
+function exportOne(b: Book, kind: "marc" | "dc") {
+  const row = bookToRow(b);
+  const csv = kind === "marc" ? toMarcCsv([row]) : toCsv([row]);
+  const slug = b.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "buku";
+  const name = `${slug}-${kind === "marc" ? "marc21" : "dublincore"}.csv`;
+  downloadCsv(name, csv);
 }
 
 function Row({ icon: Icon, label, value, mono }: { icon: any; label: string; value?: string | null; mono?: boolean }) {

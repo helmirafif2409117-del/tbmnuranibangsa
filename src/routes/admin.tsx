@@ -4,7 +4,7 @@ import { Section } from "@/components/site/Section";
 import { CoverUploader } from "@/components/site/CoverUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload, Eye } from "lucide-react";
+import { Trash2, Plus, BookOpen, Pencil, LogOut, Lock, X, Download, Upload, Eye, Search, Sparkles, Loader2 } from "lucide-react";
 import { parseCsv, rowsToBooks, toCsv, toMarcCsv, downloadCsv } from "@/lib/book-csv";
 
 export const Route = createFileRoute("/admin")({
@@ -274,10 +274,30 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               </button>
             </div>
 
+            <GoogleBooksSearch
+              onPick={(d) =>
+                setEditor((s) => ({
+                  ...s,
+                  data: {
+                    ...s.data,
+                    title: d.title || s.data.title,
+                    creator: d.creator || s.data.creator,
+                    publisher: d.publisher || s.data.publisher,
+                    description: d.description || s.data.description,
+                    identifier: d.identifier || s.data.identifier,
+                    subject: d.subject || s.data.subject,
+                    language: d.language || s.data.language,
+                    cover_url: d.cover_url || s.data.cover_url,
+                  },
+                }))
+              }
+            />
+
             <CoverUploader
               value={editor.data.cover_url}
               onChange={(url) => setEditor((s) => ({ ...s, data: { ...s.data, cover_url: url } }))}
             />
+
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Title (245)" required value={editor.data.title} onChange={set("title")} />
@@ -474,3 +494,147 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
     </>
   );
 }
+
+type GBPick = {
+  title: string;
+  creator: string;
+  publisher: string;
+  description: string;
+  identifier: string;
+  subject: string;
+  language: string;
+  cover_url: string | null;
+};
+
+type GBItem = {
+  id: string;
+  volumeInfo: {
+    title?: string;
+    subtitle?: string;
+    authors?: string[];
+    publisher?: string;
+    publishedDate?: string;
+    description?: string;
+    industryIdentifiers?: { type: string; identifier: string }[];
+    categories?: string[];
+    language?: string;
+    imageLinks?: { thumbnail?: string; smallThumbnail?: string };
+  };
+};
+
+function GoogleBooksSearch({ onPick }: { onPick: (d: GBPick) => void }) {
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<GBItem[]>([]);
+  const [open, setOpen] = useState(false);
+
+  const search = async () => {
+    const query = q.trim();
+    if (!query) return toast.error("Masukkan judul atau ISBN dulu");
+    setLoading(true);
+    try {
+      const isIsbn = /^\d{9,13}[\dxX]?$/.test(query.replace(/[-\s]/g, ""));
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${
+        isIsbn ? `isbn:${encodeURIComponent(query.replace(/[-\s]/g, ""))}` : encodeURIComponent(query)
+      }&maxResults=8&printType=books`;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("Gagal terhubung ke Google Books");
+      const j = await r.json();
+      const items: GBItem[] = j.items ?? [];
+      setResults(items);
+      setOpen(true);
+      if (items.length === 0) toast.info("Tidak ada hasil ditemukan");
+    } catch (e: any) {
+      toast.error(e.message ?? "Gagal mencari");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pick = (it: GBItem) => {
+    const v = it.volumeInfo;
+    const isbn =
+      v.industryIdentifiers?.find((x) => x.type === "ISBN_13")?.identifier ??
+      v.industryIdentifiers?.find((x) => x.type === "ISBN_10")?.identifier ??
+      "";
+    const cover = (v.imageLinks?.thumbnail || v.imageLinks?.smallThumbnail || "").replace(/^http:/, "https:");
+    onPick({
+      title: [v.title, v.subtitle].filter(Boolean).join(" — "),
+      creator: (v.authors ?? []).join(", "),
+      publisher: [v.publisher, v.publishedDate].filter(Boolean).join(", "),
+      description: v.description ?? "",
+      identifier: isbn,
+      subject: (v.categories ?? []).join("; "),
+      language: v.language ?? "",
+      cover_url: cover || null,
+    });
+    toast.success("Form diisi otomatis dari Google Books");
+    setOpen(false);
+  };
+
+  return (
+    <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="grid place-items-center h-8 w-8 rounded-lg bg-primary text-primary-foreground">
+          <Sparkles className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-sm font-bold">Isi Otomatis dari Google Books</p>
+          <p className="text-[11px] text-muted-foreground">Cari berdasarkan judul atau ISBN, lalu pilih hasilnya.</p>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); search(); } }}
+          placeholder="Cari Judul Buku / ISBN…"
+          className="flex-1 rounded-xl border-2 border-input bg-background px-3 py-2 text-sm focus:outline-none focus:border-primary"
+        />
+        <button
+          type="button"
+          onClick={search}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-bold hover:translate-y-[-1px] transition-transform disabled:opacity-60"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          Cari Otomatis
+        </button>
+      </div>
+      {open && results.length > 0 && (
+        <div className="max-h-72 overflow-y-auto rounded-xl border border-border bg-card divide-y divide-border">
+          {results.map((it) => {
+            const v = it.volumeInfo;
+            const cover = (v.imageLinks?.smallThumbnail || v.imageLinks?.thumbnail || "").replace(/^http:/, "https:");
+            return (
+              <button
+                key={it.id}
+                type="button"
+                onClick={() => pick(it)}
+                className="w-full text-left flex gap-3 p-3 hover:bg-primary/5 transition-colors"
+              >
+                <div className="w-12 h-16 bg-muted rounded shrink-0 overflow-hidden grid place-items-center">
+                  {cover ? (
+                    <img src={cover} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm leading-tight line-clamp-2">{v.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                    {(v.authors ?? []).join(", ") || "—"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                    {[v.publisher, v.publishedDate].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+

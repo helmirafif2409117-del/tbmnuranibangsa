@@ -209,6 +209,24 @@ function BookDetailPage() {
   );
 }
 
+function bookToRow(b: Book): BookRow {
+  return {
+    title: b.title, creator: b.creator, contributor: b.contributor,
+    subject: b.subject ?? [], publisher: b.publisher, series: b.series,
+    language: b.language, type: b.type, identifier: b.identifier,
+    description: b.description, coverage: b.coverage,
+    marc_record: b.marc_record, cover_url: b.cover_url,
+  };
+}
+
+function exportOne(b: Book, kind: "marc" | "dc") {
+  const row = bookToRow(b);
+  const csv = kind === "marc" ? toMarcCsv([row]) : toCsv([row]);
+  const slug = b.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "buku";
+  const name = `${slug}-${kind === "marc" ? "marc21" : "dublincore"}.csv`;
+  downloadCsv(name, csv);
+}
+
 function Row({ icon: Icon, label, value, mono }: { icon: any; label: string; value?: string | null; mono?: boolean }) {
   if (!value) return null;
   return (

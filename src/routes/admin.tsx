@@ -349,18 +349,25 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
-  const onExport = () => {
-    const csv = toCsv(books.map((b) => ({
-      title: b.title,
-      creator: b.creator, contributor: b.contributor,
-      subject: b.subject ?? [], publisher: b.publisher, series: b.series,
-      language: b.language, type: b.type, identifier: b.identifier,
-      description: b.description, coverage: b.coverage,
-      marc_record: b.marc_record, cover_url: b.cover_url,
-    })));
-    downloadCsv(`koleksi-buku-${new Date().toISOString().slice(0, 10)}.csv`, csv);
-    toast.success(`${books.length} buku diekspor`);
+  const mapBooks = () => books.map((b) => ({
+    title: b.title,
+    creator: b.creator, contributor: b.contributor,
+    subject: b.subject ?? [], publisher: b.publisher, series: b.series,
+    language: b.language, type: b.type, identifier: b.identifier,
+    description: b.description, coverage: b.coverage,
+    marc_record: b.marc_record, cover_url: b.cover_url,
+  }));
+
+  const onExportDC = () => {
+    downloadCsv(`koleksi-dublincore-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(mapBooks()));
+    toast.success(`${books.length} buku diekspor (Dublin Core)`);
   };
+
+  const onExportMarc = () => {
+    downloadCsv(`koleksi-marc21-${new Date().toISOString().slice(0, 10)}.csv`, toMarcCsv(mapBooks()));
+    toast.success(`${books.length} buku diekspor (MARC 21)`);
+  };
+
 
   const onImport = async (f: File | null) => {
     if (!f) return;

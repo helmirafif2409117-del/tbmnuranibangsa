@@ -178,14 +178,15 @@ function BookDetailPage() {
             </div>
           </div>
 
-          {book.marc_record && (
-            <div>
-              <h2 className="font-display text-xl font-bold mb-3">MARC 21 Record</h2>
-              <pre className="p-4 bg-muted rounded-2xl text-xs overflow-x-auto whitespace-pre-wrap font-mono border border-border">
-                {book.marc_record}
-              </pre>
-            </div>
-          )}
+          <div>
+            <h2 className="font-display text-xl font-bold mb-3">MARC 21 Record</h2>
+            <pre className="p-4 bg-muted rounded-2xl text-xs overflow-x-auto whitespace-pre-wrap font-mono border border-border">
+              {book.marc_record && book.marc_record.trim() ? book.marc_record : buildMarcRecord(book)}
+            </pre>
+            {!book.marc_record?.trim() && (
+              <p className="text-[11px] text-muted-foreground mt-2">* MARC 21 dihasilkan otomatis dari metadata Dublin Core.</p>
+            )}
+          </div>
         </div>
       </div>
     </Section>

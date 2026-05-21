@@ -413,10 +413,16 @@ function ImportExport({ books, reload }: { books: Book[]; reload: () => void }) 
         <Upload className="h-4 w-4" /> {busy ? "Mengimpor…" : "Import CSV"}
       </button>
       <button
-        onClick={onExport}
+        onClick={onExportDC}
         className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
       >
-        <Download className="h-4 w-4" /> Export CSV
+        <Download className="h-4 w-4" /> Export Dublin Core
+      </button>
+      <button
+        onClick={onExportMarc}
+        className="inline-flex items-center gap-2 rounded-full bg-card border-2 border-input px-4 py-2 text-xs font-bold hover:border-primary"
+      >
+        <Download className="h-4 w-4" /> Export MARC 21
       </button>
     </>
   );
